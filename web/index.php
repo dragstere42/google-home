@@ -85,9 +85,7 @@ $app->post('/hello', function () use ($app) {
 });
 
 
-// REST tcl prochain tram
-
-//Check how to use parameter part dieu / la soie
+// REST tcl prochain tram PART DIEU / LA SOIE
 $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
     $parameters=$request->request->get("result");
     $parameters = $parameters["parameters"];
@@ -166,7 +164,7 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
         $typeSuivant = "inconnu";
     }
 
-    $phrase1 = "Prochain ".$type." direction ".$direction.$depart." arrivé à ".$arrivee;
+    $phrase1 = "Prochain ".$type." direction ".$direction." ".$depart." arrivé à ".$arrivee;
     $phrase2 = " ".$typeSuivant." Suivant direction ".$direction. " ".$heureDepartSuivant." arrivé à ".$heureArriveeSuivant;
 
     $phrase = $phrase1.$phrase2;
