@@ -91,9 +91,17 @@ $app->post('/hello', function () use ($app) {
 $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
     $parameters=$request->request->get("result");
     $parameters = $parameters["parameters"];
-    $parameters = $parameters["direction"];
+    $direction = $parameters["direction"];
 
-    $tcl_prochain_tram_url='http://www.tcl.fr/Me-deplacer/Itineraires/Mon-trajet?ItinDepart=Reconnaissance+-+Balzac%2C+Lyon+3eme+%28Arr%C3%AAt%29&valueItinDepart=StopArea%7C2035%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&valueItinDepartFavoris=StopArea%7Ctcl5560%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&ItinArrivee=Gare+SNCF+de+la+Part-Dieu%2C+Lyon+3eme&valueItinArrivee=Site%7C1468%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7C4326%2195%211%3B&valueItinArriveeFavoris=Site%7Ctcl20452%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7Ctcl35754%2195%211%3B&radioTiming=DepartImm&DepartMinute=00&radioSens=HorPartir&radioOption=OptionArrivRapid&lancer_recherche=Rechercher';
+    if($direction == "part dieu"){
+        $tcl_prochain_tram_url='http://www.tcl.fr/Me-deplacer/Itineraires/Mon-trajet?ItinDepart=Reconnaissance+-+Balzac%2C+Lyon+3eme+%28Arr%C3%AAt%29&valueItinDepart=StopArea%7C2035%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&valueItinDepartFavoris=StopArea%7Ctcl5560%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&ItinArrivee=Gare+SNCF+de+la+Part-Dieu%2C+Lyon+3eme&valueItinArrivee=Site%7C1468%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7C4326%2195%211%3B&valueItinArriveeFavoris=Site%7Ctcl20452%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7Ctcl35754%2195%211%3B&radioTiming=DepartImm&DepartMinute=00&radioSens=HorPartir&radioOption=OptionArrivRapid&lancer_recherche=Rechercher';
+    }elseif($direction == "la soie"){
+        $tcl_prochain_tram_url='http://www.tcl.fr/Me-deplacer/Itineraires/Mon-trajet?ItinDepart=Reconnaissance+-+Balzac%2C+Lyon+3eme+%28Arr%C3%AAt%29&valueItinDepart=StopArea%7C2035%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&valueItinDepartFavoris=StopArea%7Ctcl5560%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&ItinArrivee=Parc+Relais+TCL+Vaulx-en-Velin+La+Soie%2C+Vaulx-en-Velin&valueItinArrivee=Site%7C555%7CParc+Relais+TCL+Vaulx-en-Velin+La+Soie%7CVaulx-en-Velin%7C%7C%7C801132%7C2087766%7C2339%2177%211%3B&valueItinArriveeFavoris=Site%7Ctcl21549%7CParc+Relais+TCL+Vaulx-en-Velin+La+Soie%7CVaulx-en-Velin%7C%7C%7C801132%7C2087766%7Ctcl37170%2177%211%3B&radioTiming=DepartImm&DepartMinute=00&radioSens=HorPartir&radioOption=OptionArrivRapid&lancer_recherche=Rechercher';
+    }else{
+        $tcl_prochain_tram_url='http://www.tcl.fr/Me-deplacer/Itineraires/Mon-trajet?ItinDepart=Reconnaissance+-+Balzac%2C+Lyon+3eme+%28Arr%C3%AAt%29&valueItinDepart=StopArea%7C2035%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&valueItinDepartFavoris=StopArea%7Ctcl5560%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&ItinArrivee=Gare+SNCF+de+la+Part-Dieu%2C+Lyon+3eme&valueItinArrivee=Site%7C1468%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7C4326%2195%211%3B&valueItinArriveeFavoris=Site%7Ctcl20452%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7Ctcl35754%2195%211%3B&radioTiming=DepartImm&DepartMinute=00&radioSens=HorPartir&radioOption=OptionArrivRapid&lancer_recherche=Rechercher';
+        $direction = "part dieu";
+    }
+
     $homepage = file_get_contents($tcl_prochain_tram_url);
 
     $pos = strpos($homepage, 'class="depart"');
@@ -158,16 +166,16 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
         $typeSuivant = "inconnu";
     }
 
-    $phrase1 = "Prochain ".$type." à ".$depart." arrivé à ".$arrivee;
-    $phrase2 = " ".$typeSuivant." Suivant à ".$heureDepartSuivant." arrivé à ".$heureArriveeSuivant;
+    $phrase1 = "Prochain ".$type." direction ".$direction.$depart." arrivé à ".$arrivee;
+    $phrase2 = " ".$typeSuivant." Suivant direction ".$direction. " ".$heureDepartSuivant." arrivé à ".$heureArriveeSuivant;
 
     $phrase = $phrase1.$phrase2;
     $phrase = str_replace("\t","",$phrase);
     $phrase = str_replace("\n","",$phrase);
 
     // change the retrun for google home
-    $result = array("speech" => $parameters.$phrase,
-        "displayText"=> $parameters.$phrase
+    $result = array("speech" => $phrase,
+        "displayText"=> $phrase
     );
     return $app->json($result, 200);
 
