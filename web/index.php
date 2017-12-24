@@ -67,7 +67,7 @@ $app->post('/hello', function () use ($app) {
                     "contextOut" => []
     );
 
-    return $app->json($result, 201);
+    return $app->json($result, 200);
 
 });
 
@@ -82,7 +82,7 @@ $app->get('/tcl-prochain-tram', function () use ($app) {
     $trajet=$dom->getElementById('RESULT-trajet');
 
     $result = array("hello" => 'hello micka');
-    return $app->json($result, 201);
+    return $app->json($result, 200);
 
 });
 
