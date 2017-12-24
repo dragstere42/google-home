@@ -43,7 +43,30 @@ $app->before(function (Request $request) {
 // REST hello
 $app->post('/hello', function () use ($app) {
 
-    $result = array("speech" => 'hello micka from speech',"displayText"=> 'Hello mika from displayText');
+    $result = array("speech" => 'hello micka from speech',
+                    "displayText"=> 'Hello mika from displayText'
+                    );
+    $result='{
+  "speech": "test",
+  "displayText": "tt",
+  "data": {
+    "google": {
+      "expect_user_response": true,
+      "is_ssml": true,
+    }
+  },
+  "contextOut": [],
+}';
+
+    $google = array("expect_user_response"=> false,
+                    "is_ssml"=>true);
+    $data = array("google"=>$google);
+    $result = array("speech" => 'hello micka from speech',
+                    "displayText"=> 'Hello mika from displayText',
+                    "data"=> $data,
+                    "contextOut" => []
+    );
+
     return $app->json($result, 201);
 
 });
