@@ -30,6 +30,30 @@ $app->before(function (Request $request) {
     }
 });
 
+$app->before(function() use ($app)
+{
+    if (!isset($_SERVER['PHP_AUTH_USER']))
+    {
+        header('WWW-Authenticate: Basic realm=naslyon');
+        return $app->json(array('Message' => 'Not Authorised'), 401);
+    }
+    else
+    {
+        //once the user has provided some details, check them
+        $users = array(
+            'google-home' => 'Google_Home&NASLyon'
+        );
+
+        if($users[$_SERVER['PHP_AUTH_USER']] !== $_SERVER['PHP_AUTH_PW'])
+        {
+            //If the password for this user is not correct then resond as such
+            return $app->json(array('Message' => 'Forbidden'), 403);
+        }
+
+        //If everything is fine then the application will carry on as normal
+    }
+});
+
 /////////////////////
 //TODO
 
