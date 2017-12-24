@@ -56,8 +56,7 @@ $app->post('/hello', function () use ($app) {
 
 //change to post and check how to use parameter part dieu / la soie
 $app->get('/tcl-prochain-tram', function () use ($app) {
-    $tcl_prochain_tram_url='http://www.tcl.fr/Me-deplacer/Itineraires/Mon-trajet?ItinDepart=Reconnaissance+-+Balzac%2C+Lyon+3eme+%28Arr%C3%AAt%29&valueItinDepart=StopArea%7C2035%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&valueItinDepartFavoris=StopArea%7Ctcl5560%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&ItinArrivee=Relais+Info+Service+TCL+Part+Dieu+Villette%2C+Lyon+3eme&valueItinArrivee=Site%7C1537%7CRelais+Info+Service+TCL+Part+Dieu+Villette%7CLyon+3eme%7C%7C%7C796432%7C2087617%7C4309%2150%211%3B&valueItinArriveeFavoris=Site%7Ctcl21850%7CRelais+Info+Service+TCL+Part+Dieu+Villette%7CLyon+3eme%7C%7C%7C796432%7C2087617%7Ctcl35659%2150%211%3B&radioTiming=DepartImm&DepartMinute=00&radioSens=HorPartir&radioOption=OptionArrivRapid&lancer_recherche=Rechercher';
-
+    $tcl_prochain_tram_url='http://www.tcl.fr/Me-deplacer/Itineraires/Mon-trajet?ItinDepart=Reconnaissance+-+Balzac%2C+Lyon+3eme+%28Arr%C3%AAt%29&valueItinDepart=StopArea%7C2035%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&valueItinDepartFavoris=StopArea%7Ctcl5560%7CReconnaissance+-+Balzac%7CLyon+3eme%7C%7C%7C798248%7C2087000&ItinArrivee=Gare+SNCF+de+la+Part-Dieu%2C+Lyon+3eme&valueItinArrivee=Site%7C1468%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7C4326%2195%211%3B&valueItinArriveeFavoris=Site%7Ctcl20452%7CGare+SNCF+de+la+Part-Dieu%7CLyon+3eme%7C%7C%7C796206%7C2087625%7Ctcl35754%2195%211%3B&radioTiming=DepartImm&DepartMinute=00&radioSens=HorPartir&radioOption=OptionArrivRapid&lancer_recherche=Rechercher';
     $homepage = file_get_contents($tcl_prochain_tram_url);
 
     $pos = strpos($homepage, 'class="depart"');
@@ -90,14 +89,49 @@ $app->get('/tcl-prochain-tram', function () use ($app) {
     $depart = str_replace("h","heure",$depart);
     $arrivee = str_replace("h","heure",$arrivee);
 
-    echo $depart;
-    echo $arrivee;
-    echo $type;
-    exit;
+    //depart suivant
+    $pos = strpos($homepage, 'class="INFOS-depart-suivant"');
+    $departSuivant = substr($homepage,$pos);
+    $pos = strpos($departSuivant, "</div>");
+    $departSuivant = substr($departSuivant,0,$pos);
+
+    $pos = strpos($departSuivant, 'class="depart"');
+    $heureDepartSuivant = substr($departSuivant,$pos);
+    $pos = strpos($heureDepartSuivant, "</span>");
+    $heureDepartSuivant = substr($heureDepartSuivant,15,$pos-15);
+
+    $pos = strpos($departSuivant, 'class="arrivee"');
+    $heureArriveeSuivant = substr($departSuivant,$pos);
+    $pos = strpos($heureArriveeSuivant, "</span>");
+    $heureArriveeSuivant = substr($heureArriveeSuivant,0+16,$pos-16);
+
+    $heureDepartSuivant = str_replace("h","heure",$heureDepartSuivant);
+    $heureArriveeSuivant = str_replace("h","heure",$heureArriveeSuivant);
+
+    $pos = strpos($departSuivant, 'type-de-ligne');
+    $typeSuivant = substr($departSuivant,$pos);
+    $pos = strpos($typeSuivant, ".png");
+    $typeSuivant = substr($typeSuivant,0,$pos);
+
+    if(strpos($typeSuivant, 'TRA') != false){
+        $typeSuivant = "TRAM";
+    }elseif(strpos($typeSuivant, 'BUS') != false){
+        $typeSuivant = "BUS";
+    }else{
+        $typeSuivant = "inconnu";
+    }
+
+    $phrase1 = "Prochain ".$type." à ".$depart." arrivé à ".$arrivee;
+    $phrase2 = " ".$typeSuivant." Suivant à ".$heureDepartSuivant." arrivé à ".$heureArriveeSuivant;
+
+    $phrase = $phrase1.$phrase2;
+    $phrase = str_replace("\t","",$phrase);
+    $phrase = str_replace("\n","",$phrase);
 
     // change the retrun for google home
-
-    $result = array("hello" => 'hello micka');
+    $result = array("speech" => $phrase,
+        "displayText"=> $phrase
+    );
     return $app->json($result, 200);
 
 });
