@@ -180,6 +180,63 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
 });
 
 
+// Get train
+$app->post('/train', function () use ($app) {
+
+    $ch = curl_init("https://www.trainline.fr/api/v5_1/search");
+    curl_setopt_array($ch, array(
+        CURLOPT_URL => "https://www.trainline.fr/api/v5_1/search",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_SSL_VERIFYPEER => 0,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => "{\"search\":{\"departure_date\":\"2018-02-23T18:00:00UTC\",\"return_date\":null,\"cuis\":{},\"systems\":[\"sncf\",\"db\",\"idtgv\",\"ouigo\",\"trenitalia\",\"ntv\",\"hkx\",\"renfe\",\"benerail\",\"ocebo\",\"westbahn\",\"leoexpress\",\"locomore\",\"busbud\",\"flixbus\",\"distribusion\",\"city_airport_train\",\"timetable\"],\"exchangeable_part\":null,\"source\":null,\"is_previous_available\":false,\"is_next_available\":false,\"departure_station_id\":\"4676\",\"via_station_id\":null,\"arrival_station_id\":\"4924\",\"exchangeable_pnr_id\":null,\"passenger_ids\":[\"55107035\"],\"card_ids\":[\"2586954\"]}}",
+        CURLOPT_HTTPHEADER => array(
+            "Accept: application/json, text/javascript, */*; q=0.01",
+            "Accept-Encoding: gzip, deflate, br",
+            "Accept-Language: fr-FR,fr;q=0.8",
+            "Authorization: Token token=\"LG_XjKLCoLiZsztvnfhQ\"",
+            "Cache-Control: no-cache",
+            "Connection: keep-alive",
+            "Content-Length: 531",
+            "Content-Type: application/json; charset=utf-8",
+            "Cookie: _ga=GA1.2.1666471707.1518030342; _gid=GA1.2.375413982.1518030342; mobile=no; _uetsid=_uetd509d2ba",
+            "Host: www.trainline.fr",
+            "Postman-Token: 19ed6425-b400-58e2-dc02-869f37f7fd47",
+            "Referer: https://www.trainline.fr/search/lyon-part-dieu/paris-gare-de-lyon/2018-02-23-18:00",
+            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0",
+            "X-CT-Client-Id: 3a27a0b0-b233-48f5-961b-e2c563566e34",
+            "X-CT-Locale: fr",
+            "X-CT-Timestamp: 1517993347",
+            "X-CT-Version: b678a32740bf5985de99ffc8f52579d1c7b84f46",
+            "X-Requested-With: XMLHttpRequest",
+            "X-User-Agent: CaptainTrain/1517993347(web) (Ember 2.18.0)"
+        ),
+    ));
+
+    // Send the request
+    $response = curl_exec($ch);
+
+// Check for errors
+    if($response === FALSE){
+        die(curl_error($ch));
+    }
+    $res = json_decode($response);
+    $res1 = $res->folders;
+    foreach($res1 as $key => $r){
+        var_dump($r->is_sellable);
+    }
+    exit;
+
+// Decode the response
+    $responseData = json_decode($response, TRUE);
+
+    return $app->json($responseData, 200);
+
+});
 
 $app['debug'] = true;
 $app->run();
