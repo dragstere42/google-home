@@ -32,6 +32,7 @@ $app->before(function (Request $request) {
 //authentification basic
 $app->before(function() use ($app)
 {
+    $variables = parse_ini_file('.env');
     if (!isset($_SERVER['PHP_AUTH_USER']))
     {
         header('WWW-Authenticate: Basic realm=naslyon');
@@ -181,27 +182,23 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
 
 // Get train
 $app->post('/train', function () use ($app) {
-    $smtp = 'smtp.gmail.com';
-    $port = 465;
-    $user = 'michael.enjolras@gmail.com';
-    $password = '';
-    $encryption = 'ssl';
-    $from = 'michael.enjolras@gmail.com';
-    $to = 'michael.enjolras@yahoo.fr';
 
-    $smtp_host_ip = gethostbyname($smtp);
-    $transport = Swift_SmtpTransport::newInstance($smtp_host_ip, $port, $encryption)
-        ->setUsername($user)
-        ->setPassword($password);
+    $variables = parse_ini_file('.env');
+
+    $smtp_host_ip = gethostbyname($variables['SMTP']);
+    $transport = Swift_SmtpTransport::newInstance($smtp_host_ip, $variables['PORT'], $variables['ENCRYPTION'])
+        ->setUsername($variables['USER'])
+        ->setPassword($variables['PASSWORD']);
     $mailer = Swift_Mailer::newInstance($transport);
 
     $passenger_ids = 55107035;
     $cards_ids = 2586954;
     $token = "LG_XjKLCoLiZsztvnfhQ";
+    $array[] = '';
 
     $now = date("Y-m-d H:i:s");
     $day = date("Y-m-d");
-    $reqActif = "SELECT * FROM need_train WHERE datetime > :now AND notification != :day ORDER BY datetime ASC";
+    $reqActif = "SELECT * FROM need_train WHERE datetime > :now AND notification != :day AND actif = TRUE ORDER BY datetime ASC";
     $actif = $app['db']->fetchAll($reqActif, array('now' => $now, 'day' => $day));
 
     if ($actif != null){
@@ -279,52 +276,52 @@ $app->post('/train', function () use ($app) {
             }
             $res = json_decode($response);
             $res1 = $res->folders;
-
-            $array[] = '';
             foreach($res1 as $key => $r){
-                if($r->is_sellable == true){
-                    if(substr($r->departure_date,0,-6) >= substr($depart,0,-3) ) {
-                        $array.array_push(substr($r->departure_date,0,-6));
-                        $sujet = 'Train disponible le: '.$value['datetime'].' de '.$nom_depart. ' a '. $nom_arrivee;
-                        $body = $sujet . '\n' . 'Lien: '.$url;
-                        var_dump($sujet);
-                        $body = '
+                if($r->is_sellable == true) {
+                    if (substr($r->departure_date, 0, -6) >= substr($depart, 0, -3)) {
+                        array_push($array, str_replace('T',' ',substr($r->departure_date, 0, -6)));
+                    }
+                }
+            }
+            if ($array != '') {
+                $liste = '';
+                foreach ($array as $a) {
+                    $liste = $liste . $a . '<br />';
+                }
+                $sujet = 'Train disponible le: ' . $value['datetime'] . ' de ' . $nom_depart . ' a ' . $nom_arrivee;
+                $body = $sujet . '\n' . 'Lien: ' . $url;
+                $body = '
                                  <html>
                                   <head>
-                                   <title>Train disponible le '.$value['datetime'].' de '.$nom_depart. ' a '. $nom_arrivee.' </title>
+                                   <title>Train disponible le ' . $value['datetime'] . ' de ' . $nom_depart . ' a ' . $nom_arrivee . ' </title>
                                   </head>
                                   <body>
-                                   <p>Train disponible le '.$value['datetime'].' de '.$nom_depart. ' a '. $nom_arrivee.'</p>
-                                   <a href='.$url.'> Lien reservation</a>
+                                   <p>Train disponible le ' . $value['datetime'] . ' de ' . $nom_depart . ' a ' . $nom_arrivee . '</p>
+                                   <a href=' . $url . '> Lien reservation</a>
+                                   <p>
+                                     ' . $liste . '
+                                   </p>
                                   </body>
                                  </html>
                                  ';
-                        $message = Swift_Message::newInstance($sujet)
-                            ->setFrom(array($from => 'TRAIN'))
-                            ->setTo(array($to => 'Michael'));
-                        $message->setBody($body, 'text/html');
-                        try {
-                            $mailer->send($message);
-                        }
-                        catch (\Swift_TransportException $e) {
-                            echo $e->getMessage();
-                        }
-                    }
-                    if ($array != '') {
-
-                    }
-
-                    exit;
+                $message = Swift_Message::newInstance($sujet)
+                    ->setFrom(array($variables['FROM'] => 'TRAIN'))
+                    ->setTo(array($variables['TO'] => 'Michael'));
+                $message->setBody($body, 'text/html');
+                try {
+                    $mailer->send($message);
+                } catch (\Swift_TransportException $e) {
+                    echo $e->getMessage();
                 }
             }
+            $array = '';
+            $array[]= '';
         }
     }
-    exit;
 
     // Decode the response
-    $responseData = json_decode($response, TRUE);
-
-    return $app->json($responseData, 200);
+    //$responseData = json_decode($array, TRUE);
+    return $app->json($array, 200);
 
 });
 
