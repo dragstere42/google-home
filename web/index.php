@@ -213,7 +213,7 @@ $app->post('/set_week_end', function () use ($app) {
     exit;
 });
 
-// Create an alert on date
+// Create an alert on date twig date, heure, gare depart, gare arrivee
 $app->post('/create_date', function () use ($app) {
 
 });
@@ -343,6 +343,8 @@ $app->post('/train', function () use ($app) {
                 }
                 $sujet = 'Train disponible le: ' . $value['datetime'] . ' de ' . $nom_depart . ' a ' . $nom_arrivee;
                 $body = $sujet . '\n' . 'Lien: ' . $url;
+                $change_status_url = $variables['SERVER_URL'].'/change_status/'.$value['datetime'].'/0';
+
                 $body = '
                                  <html>
                                   <head>
@@ -354,6 +356,7 @@ $app->post('/train', function () use ($app) {
                                    <p>
                                      ' . $liste . '
                                    </p>
+                                   <a href='.$change_status_url.' > Train deja reserve</a>
                                   </body>
                                  </html>
                                  ';
