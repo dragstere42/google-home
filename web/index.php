@@ -178,7 +178,7 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
 
 });
 
-// Set week-end
+// Set week-end AND ADD CLEAN --------------------------------------------------------------------
 $app->post('/set_week_end', function () use ($app) {
     $now = strtotime("now");
     $end_date = strtotime("+40 days");
@@ -211,8 +211,27 @@ $app->post('/set_week_end', function () use ($app) {
         $now = strtotime(date("Y-m-d", $now) . "+1 day");
     }
     exit;
+});
+
+// Create an alert on date
+$app->post('/create_date', function () use ($app) {
 
 });
+
+// Create an alert on date -> send link in email
+$app->get('/change_status/{datetime}/{actif}', function (Request $request, $datetime, $actif) use ($app) {
+    $reqActif = "SELECT * FROM need_train WHERE datetime =:now";
+    $isActif = $app['db']->fetchAll($reqActif, array('now' => $datetime ));
+    if(sizeof($isActif) > 0){
+        $app['db']->update('need_train',
+            array('actif' => $actif),
+            array('datetime' => $datetime));
+        return $app->json('', 200);
+    }
+    return $app->json('datetime not found', 500);
+
+});
+
 
 // Get train
 $app->post('/train', function () use ($app) {
