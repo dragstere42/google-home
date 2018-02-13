@@ -35,14 +35,14 @@ $app->before(function() use ($app)
     $variables = parse_ini_file('.env');
     if (!isset($_SERVER['PHP_AUTH_USER']))
     {
-        header('WWW-Authenticate: Basic realm=naslyon');
+        header('WWW-Authenticate: Basic realm='.$variables['BASIC_USER']);
         return $app->json(array('Message' => 'Not Authorised'), 401);
     }
     else
     {
         //once the user has provided some details, check them
         $users = array(
-            'google-home' => 'Google_Home&NASLyon'
+            'google-home' => $variables['BASIC_PASSWORD']
         );
 
         if($users[$_SERVER['PHP_AUTH_USER']] !== $_SERVER['PHP_AUTH_PW'])
