@@ -184,7 +184,7 @@ $app->post('/train', function () use ($app) {
     $smtp = 'smtp.gmail.com';
     $port = 465;
     $user = 'michael.enjolras@gmail.com';
-    $password = '13061991';
+    $password = '';
     $encryption = 'ssl';
     $from = 'michael.enjolras@gmail.com';
     $to = 'michael.enjolras@yahoo.fr';
@@ -280,9 +280,11 @@ $app->post('/train', function () use ($app) {
             $res = json_decode($response);
             $res1 = $res->folders;
 
+            $array[] = '';
             foreach($res1 as $key => $r){
                 if($r->is_sellable == true){
                     if(substr($r->departure_date,0,-6) >= substr($depart,0,-3) ) {
+                        $array.array_push(substr($r->departure_date,0,-6));
                         $sujet = 'Train disponible le: '.$value['datetime'].' de '.$nom_depart. ' a '. $nom_arrivee;
                         $body = $sujet . '\n' . 'Lien: '.$url;
                         var_dump($sujet);
@@ -307,10 +309,12 @@ $app->post('/train', function () use ($app) {
                         catch (\Swift_TransportException $e) {
                             echo $e->getMessage();
                         }
-
-                        // Show failed recipients
-                        exit;
                     }
+                    if ($array != '') {
+
+                    }
+
+                    exit;
                 }
             }
         }
