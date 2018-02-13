@@ -178,7 +178,41 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
 
 });
 
+// Set week-end
+$app->post('/set_week_end', function () use ($app) {
+    $now = strtotime("now");
+    $end_date = strtotime("+40 days");
 
+    while (date("Y-m-d", $now) != date("Y-m-d", $end_date)) {
+        $day_index = date("w", $now);
+        if ($day_index == 0 || $day_index == 5) {
+            $heure = ' 18:00:00';
+            if($day_index == 5){
+                $gare_depart = 'lyon';
+                $gare_arrivee = 'paris';
+            }
+            if($day_index == 0){
+                $gare_depart = 'paris';
+                $gare_arrivee = 'lyon';
+            }
+            $reqActif = "SELECT * FROM need_train WHERE datetime > :before AND datetime < :after";
+            $isActif = $app['db']->fetchAll($reqActif, array('before' => date("Y-m-d", $now) . " 01:00:00", 'after' => date("Y-m-d", $now) . " 23:00:00"));
+
+            if(sizeof($isActif) == 0) {
+                $app['db']->insert('need_train', array(
+                    'datetime' => date("Y-m-d", $now) . $heure,
+                    'gare_depart' => $gare_depart,
+                    'gare_arrivee' => $gare_arrivee,
+                    'actif' => true
+                ));
+                var_dump(date("Y-m-d", $now));
+            }
+        }
+        $now = strtotime(date("Y-m-d", $now) . "+1 day");
+    }
+    exit;
+
+});
 
 // Get train
 $app->post('/train', function () use ($app) {
@@ -278,12 +312,12 @@ $app->post('/train', function () use ($app) {
             $res1 = $res->folders;
             foreach($res1 as $key => $r){
                 if($r->is_sellable == true) {
-                    if (substr($r->departure_date, 0, -6) >= substr($depart, 0, -3)) {
+                    if (substr($r->departure_date, 0, -6) >= substr($depart, 0, -3) && $r->local_amount->subunit == 0 ) {
                         array_push($array, str_replace('T',' ',substr($r->departure_date, 0, -6)));
                     }
                 }
             }
-            if ($array != '') {
+            if (sizeof($array) > 1) {
                 $liste = '';
                 foreach ($array as $a) {
                     $liste = $liste . $a . '<br />';
