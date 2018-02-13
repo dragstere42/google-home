@@ -310,6 +310,9 @@ $app->post('/train', function () use ($app) {
                 $message->setBody($body, 'text/html');
                 try {
                     $mailer->send($message);
+                    $app['db']->update('need_train',
+                        array('notification' => date("Y-m-d")),
+                        array('id' => $value['id']));
                 } catch (\Swift_TransportException $e) {
                     echo $e->getMessage();
                 }
