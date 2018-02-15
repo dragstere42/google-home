@@ -178,10 +178,13 @@ $app->post('/tcl-prochain-tram', function (Request $request) use ($app) {
 
 });
 
-// Set week-end AND ADD CLEAN --------------------------------------------------------------------
-$app->post('/set_week_end', function () use ($app) {
+// Set week-end
+$app->get('/set_week_end', function () use ($app) {
     $now = strtotime("now");
     $end_date = strtotime("+40 days");
+
+    $deleteReq = "DELETE FROM need_train WHERE datetime < :now";
+    $delete = $app['db']->executeUpdate($deleteReq, array('now' => date("Y-m-d", $now) . " 01:00:00"));
 
     while (date("Y-m-d", $now) != date("Y-m-d", $end_date)) {
         $day_index = date("w", $now);
@@ -214,7 +217,9 @@ $app->post('/set_week_end', function () use ($app) {
 });
 
 // Create an alert on date twig date, heure, gare depart, gare arrivee
-$app->post('/create_date', function () use ($app) {
+// List of active alert
+// List of disabled alert
+$app->post('/admin', function () use ($app) {
 
 });
 
