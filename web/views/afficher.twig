@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pole position</title>
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://www.datatables.net/rss.xml">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css">
+    <style type="text/css" class="init"></style>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <script type="text/javascript" language="javascript" src="http://code.jquery.com/jquery-1.12.0.min.js">
+    </script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js">
+    </script>
+
+</head>
+<body class="wide comments example">
+
+
+
+<div class="fw-container">
+
+    <div class="fw-body">
+        <div class="content">
+            <h3>Actif</h3>
+            <table id="example" class="display" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Gare depart</th>
+                    <th>Gare arrivée</th>
+                    <th>Notification</th>
+                    <th>Actif</th>
+                    <th>Changer en inatif</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for actif in actifs %}
+                <tr>
+                    <td>{{ actif.datetime }}</td>
+                    <td>{{ actif.gare_depart }}</td>
+                    <td>{{ actif.gare_arrivee }}</td>
+                    <td>{{ actif.notification }}</td>
+                    <td>{{ actif.actif }}</td>
+                    <td> <a href="{{ changeStatus }}{{ actif.datetime }}/0" target="_blank"><input type="button" name="setInatif "value="changer a inatif"/></a> </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="fw-body">
+        <div class="content">
+            <h3>Inactif</h3>
+            <table id="example" class="display" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Gare depart</th>
+                    <th>Gare arrivée</th>
+                    <th>Notification</th>
+                    <th>Actif</th>
+                    <th>Changer en actif</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for inactif in inactifs %}
+                    <tr>
+                        <td>{{ inactif.datetime }}</td>
+                        <td>{{ inactif.gare_depart }}</td>
+                        <td>{{ inactif.gare_arrivee }}</td>
+                        <td>{{ inactif.notification }}</td>
+                        <td>{{ inactif.actif }}</td>
+                        <td> <a href="{{ changeStatus }}{{ inactif.datetime }}/1" target="_blank"><input type="button" name="setInatif "value="changer en atif"/></a> </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

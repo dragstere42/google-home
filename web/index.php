@@ -219,12 +219,28 @@ $app->get('/set_week_end', function () use ($app) {
 // Create an alert on date twig date, heure, gare depart, gare arrivee
 // List of active alert
 // List of disabled alert
-$app->post('/admin', function () use ($app) {
+$app->get('/admin', function () use ($app) {
+    $variables = parse_ini_file('.env');
+
+    $lienChangeStatus = $variables['SERVER_URL'] . "/google-home/web/index.php/change_status/";
+
+    $reqActif = "SELECT * FROM need_train WHERE actif = TRUE ORDER BY datetime ASC";
+    $actifs = $app['db']->fetchAll($reqActif);
+
+    $reqInactif = "SELECT * FROM need_train WHERE actif = FALSE ORDER BY datetime ASC";
+    $inactifs = $app['db']->fetchAll($reqInactif);
+
+
+    return $app['twig']->render('afficher.twig', array(
+        'actifs' => $actifs,
+        'inactifs' => $inactifs,
+        'changeStatus' => $lienChangeStatus
+    ));
 
 });
 
 // Create an alert on date -> send link in email
-$app->get('/change_status/{datetime}/{actif}', function (Request $request, $datetime, $actif) use ($app) {
+$app->get('/change_status/{datetime}/{actif}', function ($datetime, $actif) use ($app) {
     $reqActif = "SELECT * FROM need_train WHERE datetime =:now";
     $isActif = $app['db']->fetchAll($reqActif, array('now' => $datetime ));
     if(sizeof($isActif) > 0){
