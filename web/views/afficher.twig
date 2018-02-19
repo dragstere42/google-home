@@ -28,6 +28,18 @@
                 format: 'yyyy-mm-dd'
             });
         });
+
+        function ChangeStatus(lien){
+            var r = confirm("Etez vous sur de changer le status");
+            if (r == true) {
+                $.ajax({
+                    url: lien,
+                    dataType: "jsonp"
+                }).always(function (){
+                    location.reload();
+                });
+            }
+        }
     </script>
 
     <style>
@@ -115,7 +127,7 @@
                     <td>{{ actif.gare_arrivee }}</td>
                     <td>{{ actif.notification }}</td>
                     <td>{{ actif.actif }}</td>
-                    <td> <a href="{{ changeStatus }}{{ actif.datetime }}/0" target="_blank"><input type="button" name="setInatif "value="changer a inatif"/></a> </td>
+                    <td> <input type="button" name="setInatif "value="changer a inatif" onclick="ChangeStatus('{{ changeStatus }}{{ actif.datetime }}/0')"/> </td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -146,7 +158,7 @@
                         <td>{{ inactif.gare_arrivee }}</td>
                         <td>{{ inactif.notification }}</td>
                         <td>{{ inactif.actif }}</td>
-                        <td> <a href="{{ changeStatus }}{{ inactif.datetime }}/1" target="_blank"><input type="button" name="setInatif "value="changer en atif"/></a> </td>
+                        <td> <input type="button" name="setInatif "value="changer en atif" onclick="ChangeStatus('{{ changeStatus }}{{ inactif.datetime }}/1')"/> </td>
                     </tr>
                 {% endfor %}
                 </tbody>
