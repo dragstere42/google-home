@@ -1,6 +1,12 @@
 <?php
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Silex\Provider\FormServiceProvider;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 $app = new Silex\Application();
@@ -18,6 +24,11 @@ $app->register(new Silex\Provider\DoctrineServiceProvider(),
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/views',
 ));
+$app->register(new Silex\Provider\ValidatorServiceProvider());
+$app->register(new Silex\Provider\TranslationServiceProvider(), array(
+    'translator.domains' => array(),
+));
+$app->register(new FormServiceProvider());
 
 $app->register(new Silex\Provider\UrlGeneratorServiceProvider());
 
@@ -219,10 +230,77 @@ $app->get('/set_week_end', function () use ($app) {
 // Create an alert on date twig date, heure, gare depart, gare arrivee
 // List of active alert
 // List of disabled alert
-$app->get('/admin', function () use ($app) {
+$app->match('/admin', function (Request $request) use ($app) {
     $variables = parse_ini_file('.env');
-
     $lienChangeStatus = $variables['SERVER_URL'] . "/google-home/web/index.php/change_status/";
+
+    $default = array(
+        'heure' => '19',
+        'minute' => '00',
+        'gare_depart' => 'lyon',
+        'gare_arrivee' => 'paris',
+    );
+    $arrayHeure = [];
+    for($i =0; $i <=23; $i++){
+        $arrayHeure[$i] = $i;
+    }
+
+    $arrayMinutes = [];
+    for($i = 0; $i<=59; $i= $i+5){
+        $arrayMinutes[$i]=$i;
+    }
+
+    $form = $app['form.factory']->createBuilder('form', $default)
+        ->add('date', null, array(
+            'required'   => true,
+            'attr' => ['class' => 'js-datepicker']
+        ))
+        ->add('heure', ChoiceType::class, array(
+            'choices'  => array(
+                $arrayHeure
+            ),
+        ))
+        ->add('minute', ChoiceType::class, array(
+            'choices'  => array(
+                $arrayMinutes
+            ),
+        ))
+        ->add('gare_depart', ChoiceType::class, array(
+            'choices'  => array(
+                'lyon' => 'lyon',
+                'paris' => 'paris',
+                'massy' => 'massy',
+            ),
+        ))
+        ->add('gare_arrivee', ChoiceType::class, array(
+            'choices'  => array(
+                'lyon' => 'lyon',
+                'paris' => 'paris',
+                'massy' => 'massy',
+            ),
+        ))
+
+        ->add('ajouter', 'submit', array(
+            'attr' => array('class' => 'btn btn-default')
+        ))
+        ->getForm();
+
+    $form->handleRequest($request);
+
+    if($form->isValid()) {
+        $data = $form->getData();
+
+        $date = new DateTime($data['date'] . ' ' .$data['heure'].':'.$data['minute']);
+        $dateformat = date_format($date, 'Y-m-d H:i:s');
+
+        $app['db']->insert('need_train', array(
+            'datetime' => $dateformat,
+            'gare_depart' => $data['gare_depart'],
+            'gare_arrivee' => $data['gare_arrivee'],
+            'actif' => true
+        ));
+        $app->redirect('admin');
+    }
 
     $reqActif = "SELECT * FROM need_train WHERE actif = TRUE ORDER BY datetime ASC";
     $actifs = $app['db']->fetchAll($reqActif);
@@ -230,14 +308,14 @@ $app->get('/admin', function () use ($app) {
     $reqInactif = "SELECT * FROM need_train WHERE actif = FALSE ORDER BY datetime ASC";
     $inactifs = $app['db']->fetchAll($reqInactif);
 
-
     return $app['twig']->render('afficher.twig', array(
         'actifs' => $actifs,
         'inactifs' => $inactifs,
-        'changeStatus' => $lienChangeStatus
+        'changeStatus' => $lienChangeStatus,
+        'form' => $form->createView()
     ));
 
-});
+})->bind('admin');
 
 // Create an alert on date -> send link in email
 $app->get('/change_status/{datetime}/{actif}', function ($datetime, $actif) use ($app) {
