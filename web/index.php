@@ -319,6 +319,7 @@ $app->match('/admin', function (Request $request) use ($app) {
 
 // Create an alert on date -> send link in email
 $app->get('/change_status/{datetime}/{actif}', function ($datetime, $actif) use ($app) {
+    $datetime = str_replace('*',' ',$datetime);
     $reqActif = "SELECT * FROM need_train WHERE datetime =:now";
     $isActif = $app['db']->fetchAll($reqActif, array('now' => $datetime ));
     if(sizeof($isActif) > 0){
@@ -442,7 +443,8 @@ $app->get('/train', function () use ($app) {
                 }
                 $sujet = 'Train disponible le: ' . $value['datetime'] . ' de ' . $nom_depart . ' a ' . $nom_arrivee;
                 $body = $sujet . '\n' . 'Lien: ' . $url;
-                $change_status_url = $variables['SERVER_URL'].'/change_status/'.$value['datetime'].'/0';
+                $change_status_url = $variables['SERVER_URL'].'/google-home/web/index.php/change_status/'.$value['datetime'].'/0';
+                $change_status_url = str_replace(' ','*',$change_status_url);
 
                 $body = '
                                  <html>
