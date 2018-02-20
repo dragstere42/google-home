@@ -333,7 +333,7 @@ $app->get('/change_status/{datetime}/{actif}', function ($datetime, $actif) use 
 
 
 // Get train
-$app->post('/train', function () use ($app) {
+$app->get('/train', function () use ($app) {
 
     $variables = parse_ini_file('.env');
 
