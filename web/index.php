@@ -487,10 +487,10 @@ $app->get('/train', function () use ($app) {
 
 // change chaine
 $app->get('/change_chaine/{chaine}', function ($chaine) use ($app) {
-    
+
     for($i=0; $i<strlen($chaine); $i++) {
         $number = substr($chaine,$i,1);
-        $command = escapeshellcmd('/home/pi/domoticz/scripts/broadlink/play.py box_'.$number.'.txt');
+        $command = escapeshellcmd('/home/pi/domoticz/scripts/broadlink/play.py /home/pi/domoticz/scripts/broadlink/box_'.$number.'.txt');
         shell_exec($command);
     }
     return $app->json($chaine, 200);
